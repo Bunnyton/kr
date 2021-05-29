@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6"/>
+	<Project>
+		<Option title="klient1"/>
+		<Option makefile_is_custom="1"/>
+		<Option compiler="gcc"/>
+		<Option virtualFolders="CMake Files\;"/>
+		<Build>
+			<Target title="all">
+				<Option working_dir="/home/awg/CLionProjects/klient1/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/awg/CLionProjects/klient1/cmake-build-debug/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/awg/CLionProjects/klient1/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/awg/CLionProjects/klient1/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/awg/CLionProjects/klient1/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="edit_cache">
+				<Option working_dir="/home/awg/CLionProjects/klient1/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/awg/CLionProjects/klient1/cmake-build-debug/Makefile&quot;  VERBOSE=1 edit_cache"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/awg/CLionProjects/klient1/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/awg/CLionProjects/klient1/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/awg/CLionProjects/klient1/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="rebuild_cache">
+				<Option working_dir="/home/awg/CLionProjects/klient1/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/awg/CLionProjects/klient1/cmake-build-debug/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/awg/CLionProjects/klient1/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/awg/CLionProjects/klient1/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/awg/CLionProjects/klient1/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="klient1">
+				<Option output="/home/awg/CLionProjects/klient1/cmake-build-debug/klient1" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/awg/CLionProjects/klient1/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/awg/CLionProjects/klient1/cmake-build-debug/Makefile&quot;  VERBOSE=1 klient1"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/awg/CLionProjects/klient1/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/awg/CLionProjects/klient1/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/awg/CLionProjects/klient1/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="klient1/fast">
+				<Option output="/home/awg/CLionProjects/klient1/cmake-build-debug/klient1" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/awg/CLionProjects/klient1/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/awg/CLionProjects/klient1/cmake-build-debug/Makefile&quot;  VERBOSE=1 klient1/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/awg/CLionProjects/klient1/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/awg/CLionProjects/klient1/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/awg/CLionProjects/klient1/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Unit filename="/home/awg/CLionProjects/klient1/body/filework.c">
+			<Option target="klient1"/>
+		</Unit>
+		<Unit filename="/home/awg/CLionProjects/klient1/body/main.c">
+			<Option target="klient1"/>
+		</Unit>
+		<Unit filename="/home/awg/CLionProjects/klient1/body/network.c">
+			<Option target="klient1"/>
+		</Unit>
+		<Unit filename="/home/awg/CLionProjects/klient1/body/pack.c">
+			<Option target="klient1"/>
+		</Unit>
+		<Unit filename="/home/awg/CLionProjects/klient1/body/processing_manager.c">
+			<Option target="klient1"/>
+		</Unit>
+		<Unit filename="/home/awg/CLionProjects/klient1/body/receive_manager.c">
+			<Option target="klient1"/>
+		</Unit>
+		<Unit filename="/home/awg/CLionProjects/klient1/body/send_manager.c">
+			<Option target="klient1"/>
+		</Unit>
+		<Unit filename="/home/awg/CLionProjects/klient1/body/str_addit_methods.c">
+			<Option target="klient1"/>
+		</Unit>
+		<Unit filename="/home/awg/CLionProjects/klient1/body/system.c">
+			<Option target="klient1"/>
+		</Unit>
+		<Unit filename="/home/awg/CLionProjects/klient1/headers/filework.h">
+			<Option target="klient1"/>
+		</Unit>
+		<Unit filename="/home/awg/CLionProjects/klient1/headers/header.h">
+			<Option target="klient1"/>
+		</Unit>
+		<Unit filename="/home/awg/CLionProjects/klient1/headers/network.h">
+			<Option target="klient1"/>
+		</Unit>
+		<Unit filename="/home/awg/CLionProjects/klient1/headers/pack.h">
+			<Option target="klient1"/>
+		</Unit>
+		<Unit filename="/home/awg/CLionProjects/klient1/headers/processing_manager.h">
+			<Option target="klient1"/>
+		</Unit>
+		<Unit filename="/home/awg/CLionProjects/klient1/headers/receive_manager.h">
+			<Option target="klient1"/>
+		</Unit>
+		<Unit filename="/home/awg/CLionProjects/klient1/headers/send_manager.h">
+			<Option target="klient1"/>
+		</Unit>
+		<Unit filename="/home/awg/CLionProjects/klient1/headers/str_addit_methods.h">
+			<Option target="klient1"/>
+		</Unit>
+		<Unit filename="/home/awg/CLionProjects/klient1/headers/system.h">
+			<Option target="klient1"/>
+		</Unit>
+		<Unit filename="/home/awg/CLionProjects/klient1/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\"/>
+		</Unit>
+	</Project>
+</CodeBlocks_project_file>
