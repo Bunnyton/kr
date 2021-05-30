@@ -32,13 +32,21 @@ void* start_receive_manager(NetworkContext *ctx)
         packet_list *new = (packet_list*) malloc(sizeof(packet_list));
         if (!new) {
             perror("can't allocate memory");
-            return;
+            return NULL;
+        }
+
+        new->pack = (packet*) malloc(sizeof(packet));
+        if (!new->pack) {
+            free(new);
+            perror("can't allocate memory");
+            return NULL;
         }
 
         if (!receive_pack(ctx, new)) {
+            free(new->pack);
             free(new);
             perror("can't receive packet");
-            return;
+            return NULL;
         }
 
         new->id = UNKNOWN;
