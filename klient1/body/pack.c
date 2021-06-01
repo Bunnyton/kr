@@ -37,7 +37,8 @@ packet* convert_to_packets(char *buffer, unsigned buff_len, uint16_t rec_id, pac
                 packets[i].header = pack_header(i, rec_id, MULT_MSG);
         }
     }
-    packets[amount_pack - 1].msg[current_size] = '\0';
+    if (current_size < PACKET_INFO)
+        packets[amount_pack - 1].msg[current_size] = '\0';
 
     return packets;
 }

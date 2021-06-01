@@ -25,9 +25,6 @@ packet_list *fifo_recv_start;
 packet_list *fifo_recv_last;
 
 bool process_permission_flag;
-bool sign_up_flag;
-
-uint16_t my_id;
 
 NetworkContext* network_init(int port, in_addr_t addr);
 void network_fini(NetworkContext *ctx);

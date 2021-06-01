@@ -7,16 +7,86 @@ char* read_from_keyboard()//Дописать как в мессенджере
     return buf;
 }
 
+bool add_in_wait_queue(packet *pack, struct sockaddr_in *addr, deliver_status status)
+{
+    wait_packet_list *new = (wait_packet_list*) malloc(sizeof(wait_packet_list));
+    if (new == NULL) return false;
+
+    new->pack = pack;
+    new->addr = addr;
+    new->next = NULL;
+
+    new->status = status;
+    new->send_time = clock();
+
+    if (!last) {
+        start = new;
+        last = new;
+    } else
+        last->next = new;
+
+    return true;
+}
+
+void delete_wait_pack(wait_packet_list *wait_pack) {
+    free(wait_pack->pack);
+    free(wait_pack->addr);
+    free(wait_pack);
+}
+
+double diff_time(time_t time) { return (double)(clock() - time) / CLOCKS_PER_SEC; }
+
+bool check_wait_queue(NetworkContext *ctx)
+{
+    wait_packet_list *current = start;
+    wait_packet_list *previous = start;
+    while (current != NULL){
+        if (current->status == DELIVERED) {
+            if (previous == current) {
+                start = current->next;
+                delete_wait_pack(current);
+                current = start;
+            } else {
+                previous->next = current->next;
+                delete_wait_pack(current);
+                current = previous;
+            }
+            if (current->next == NULL)
+                last = current;
+        } else {
+            double wait_time = WAIT_TIME_FOR_SEND;
+            if (current->status == WAIT_SIGNAL)
+                wait_time = WAIT_TIME_FOR_SIGNAL;
+            if (current->status == ERROR)
+                wait_time = 0;
+
+            if (diff_time(current->send_time) >= wait_time) {
+                if (!send_packet(ctx, current->pack, current->addr))
+                    return false;
+                current->send_time = clock();
+            }
+        }
+        previous = current;
+        current = current->next;
+    }
+    return true;
+}
+
 bool send_packet(NetworkContext *ctx, packet *pack, struct sockaddr_in *addr)
 {
+    if (!add_in_wait_queue(pack, addr, WAIT_DELIVER))
+        return false;
+
     ssize_t n = sendto(ctx->sock, pack
             , sizeof(packet)
             , 0
             , (const struct sockaddr *) addr
             , sizeof(*addr));
 
-    if (n != sizeof(packet))
+    if (n != sizeof(packet)) {
+        last->status = ERROR;
         return false;
+    }
 
     return true;
 }
@@ -58,7 +128,10 @@ bool send_msg(char* buffer, unsigned buff_len, uint16_t id)
         return false;
         //Возможно, здесь может быть что-то завязанное на регистрацию
     }
-    return send_msg_to(buffer, buff_len, *addr);
+    bool status = send_msg_to(buffer, buff_len, *addr);
+
+    free(addr);
+    return  status;
 }
 
 bool send_signal(NetworkContext *ctx, int16_t id, struct sockaddr_in *addr)

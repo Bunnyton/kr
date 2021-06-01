@@ -88,10 +88,10 @@ NetworkContext* system_init(){
 
     int broadcast_enable = 1;
 
-    if (setsockopt(ctx->sock, SOL_SOCKET, SO_BROADCAST, &broadcast_enable, sizeof(broadcast_enable)) == -1){
+    /*if (setsockopt(ctx->sock, SOL_SOCKET, SO_BROADCAST, &broadcast_enable, sizeof(broadcast_enable)) == -1){
         perror("setsockopt failed");
         goto error;
-    }
+    }*/
 
     if (bind(ctx->sock, (const struct sockaddr *) &ctx->addr, sizeof(ctx->addr)) < 0){
         perror("can't bind socket");
@@ -101,7 +101,6 @@ NetworkContext* system_init(){
     fifo_recv_start = NULL;
     fifo_recv_last = NULL;
     process_permission_flag = false;
-    sign_up_flag = false;
 
     FILE *file = fopen(USER_LIST_FILE, "r");
     if (file == NULL) {
