@@ -10,6 +10,10 @@
 ../headers/receive_manager.h
 /home/awg/CLionProjects/klient1/headers/receive_manager.h
 
+/home/awg/CLionProjects/klient1/body/send_manager.c
+../headers/send_manager.h
+/home/awg/CLionProjects/klient1/headers/send_manager.h
+
 /home/awg/CLionProjects/klient1/headers/filework.h
 ../headers/header.h
 /home/awg/CLionProjects/klient1/headers/header.h
@@ -53,6 +57,14 @@ header.h
 /home/awg/CLionProjects/klient1/headers/receive_manager.h
 network.h
 /home/awg/CLionProjects/klient1/headers/network.h
+
+/home/awg/CLionProjects/klient1/headers/send_manager.h
+network.h
+/home/awg/CLionProjects/klient1/headers/network.h
+filework.h
+/home/awg/CLionProjects/klient1/headers/filework.h
+str_addit_methods.h
+/home/awg/CLionProjects/klient1/headers/str_addit_methods.h
 
 /home/awg/CLionProjects/klient1/headers/str_addit_methods.h
 stdint.h
