@@ -39,7 +39,7 @@ bool sign_in()
     }
 
     for(int i = 0; i < 10; ++i)
-        if (!send_packet(ctx, &pack[0], &ctx->addr)) {
+        if (!send_packet(ctx, &pack[0], &ctx->addr, DELIVERED)) {
             perror("send error");
             goto error4;
         }
@@ -128,9 +128,9 @@ void system_start(NetworkContext *ctx)
 
     char *buffer = malloc(sizeof(char) * MAXLINE);
     while(1) {
-        printf("Message to id 2: ");
+        printf("Message to id 1: ");
         read_to(stdin, '\n', buffer);
-        send_msg(buffer, strlen(buffer), 2);
+        send_msg(buffer, strlen(buffer), 1);
         if (fifo_recv_start != NULL) {
             if (helper == NULL) {
                 helper = fifo_recv_start;

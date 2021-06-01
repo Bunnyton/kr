@@ -33,5 +33,7 @@ void network_fini(NetworkContext *ctx)
     free(ctx);
 }
 
-
-
+in_addr_t s_addr_of(packet_list *pack_list)
+{
+    return pack_list->addr.sin_addr.s_addr;
+}

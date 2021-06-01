@@ -25,8 +25,9 @@ packet* convert_to_packets(char *buffer, unsigned buff_len, uint16_t rec_id, pac
 
     size_t current_size = 0;
     for (unsigned i = 0; i < amount_pack; ++i) {
+        size_t step = current_size;
         current_size = strlen(buffer) * sizeof(char) - PACKET_INFO * i;
-        memcpy(packets[i].msg, buffer + current_size, MIN(PACKET_INFO, current_size));
+        memcpy(packets[i].msg, buffer + step, MIN(PACKET_INFO, current_size));
 
         if (amount_pack == 1)
             packets[i].header = pack_header(i, rec_id, type);

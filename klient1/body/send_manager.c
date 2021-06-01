@@ -22,8 +22,10 @@ bool add_in_wait_queue(packet *pack, struct sockaddr_in *addr, deliver_status st
     if (!last) {
         start = new;
         last = new;
-    } else
+    } else {
         last->next = new;
+        last = new;
+    }
 
     return true;
 }
@@ -61,7 +63,7 @@ bool check_wait_queue(NetworkContext *ctx)
                 wait_time = 0;
 
             if (diff_time(current->send_time) >= wait_time) {
-                if (!send_packet(ctx, current->pack, current->addr))
+                if (!send_packet(ctx, current->pack, current->addr, WAIT_DELIVER))
                     return false;
                 current->send_time = clock();
             }
@@ -72,9 +74,9 @@ bool check_wait_queue(NetworkContext *ctx)
     return true;
 }
 
-bool send_packet(NetworkContext *ctx, packet *pack, struct sockaddr_in *addr)
+bool send_packet(NetworkContext *ctx, packet *pack, struct sockaddr_in *addr, deliver_status status)
 {
-    if (!add_in_wait_queue(pack, addr, WAIT_DELIVER))
+    if (!add_in_wait_queue(pack, addr, status))
         return false;
 
     ssize_t n = sendto(ctx->sock, pack
@@ -101,22 +103,16 @@ bool send_msg_to(char* buffer, unsigned buff_len, in_addr_t addr)
 
     packet *packets = convert_to_packets(buffer, buff_len, UNKNOWN, MSG);
 
-    if (!send_packet(ctx, &packets[0], &ctx->addr)){
+    if (packets[0].header.type == QUERY)
+        for(unsigned i = 0; i < packets[0].header.num; ++i)
+            add_in_wait_queue(&packets[i], &ctx->addr, WAIT_SIGNAL);
+
+    if (!send_packet(ctx, &packets[0], &ctx->addr, WAIT_DELIVER)){
         free(packets);
         network_fini(ctx);
         return false;
     }
 
-    if (packets[0].header.type == QUERY) {
-        sleep(5);//FIXME Ждать сигнал
-
-        for (int i = 1; i < packets[0].header.num; ++i)
-            if (!send_packet(ctx, &packets[i], &ctx->addr)) {
-                network_fini(ctx);
-                return false;
-            }
-
-    }
     network_fini(ctx);
     return true;
 }
@@ -134,11 +130,13 @@ bool send_msg(char* buffer, unsigned buff_len, uint16_t id)
     return  status;
 }
 
-bool send_signal(NetworkContext *ctx, int16_t id, struct sockaddr_in *addr)
+bool send_signal(in_addr_t addr)
 {
+    NetworkContext *ctx = network_init(PORT, addr);
     packet pack;
-    pack.header = pack_header(0, id, SIGNAL);
+    pack.header = pack_header(0, UNKNOWN, SIGNAL);
 
-    return send_packet(ctx, &pack, addr);
+    bool status = send_packet(ctx, &pack, &ctx->addr, WAIT_DELIVER);
+    return status;
 }
 

@@ -1,5 +1,43 @@
 #include "../headers/processing_manager.h"
 
+bool make_mult_msg(packet_list *pack_list)
+{
+    mult_msg *new = (mult_msg*) malloc(sizeof(mult_msg));
+    if (new == NULL)
+        return false;
+
+    new->packets = (packet_list**) malloc(sizeof(packet_list*) * pack_list->pack->header.num);
+    if (new->packets == NULL)
+        return false;
+
+    new->packets[0] = pack_list;
+    new->amount = pack_list->pack->header.num;
+    new->next = NULL;
+
+    if (start_mult_msg == NULL)
+        start_mult_msg = new;
+    else
+        last_mult_msg->next = new;
+
+    last_mult_msg = new;
+    return true;
+}
+
+void add_in_mult_msg(packet_list *pack_list)
+{
+    mult_msg *current = start_mult_msg;
+    while (current != NULL) {
+
+        if (s_addr_of(current->packets[0]) == s_addr_of(pack_list))
+        {
+            unsigned num = pack_list->pack->header.num;
+            current->packets[num] = pack_list;
+            break;
+        }
+            current = current->next;
+    }
+}
+
 bool add_user_rec(uint16_t id, char *nick, in_addr_t addr)
 {
     char *id_str = uint16_t_to_str(id);
@@ -44,52 +82,6 @@ bool add_user_rec(uint16_t id, char *nick, in_addr_t addr)
     return false;
 }
 
-char* form_mult_msg(packet_list *pack_list)
-{
-    if (pack_list->pack->header.type != QUERY)
-        return NULL;
-
-    uint32_t id = pack_list->pack->header.send_id;
-    uint32_t amount = pack_list->pack->header.num;
-
-    char *buffer = (char *) malloc(sizeof(char) * PACKET_SYM_LOT * amount);
-    if (buffer == NULL) {
-        perror("can't allocate memory");
-        return NULL;
-    }
-
-    stradd(buffer, pack_list->pack->msg, 0);
-
-    pack_list = fifo_recv_last ;
-    //send_signal()
-
-    uint32_t i = 1;
-    while(i < amount){
-        if (pack_list->next){
-            pack_list = pack_list->next;
-
-            if (pack_list->pack->header.send_id == id &&
-                pack_list->pack->header.type == MULT_MSG) {
-
-                stradd(buffer, pack_list->pack->msg,
-                       pack_list->pack->header.num * PACKET_SYM_LOT);
-                ++i;
-            }
-
-        }
-    }
-    return buffer;
-}
-
-void process_mult_msg(packet_list *pack_list)
-{
-    process_permission_flag = false;
-    char *buffer = form_mult_msg(pack_list);
-    if (!save_msg(buffer, pack_list->pack->header.send_id)){
-        //Выход из системы
-    }
-}
-
 void process(packet_list *pack_list)
 {
     pack_list->id = find_id(pack_list->addr.sin_addr.s_addr);
@@ -103,7 +95,9 @@ void process(packet_list *pack_list)
             }
             break;
         case QUERY:
-            process_mult_msg(pack_list);//FIXME Запустить в параллель
+//            process_mult_msg(pack_list);//FIXME Запустить в параллель
+            make_mult_msg(pack_list);
+            send_signal(s_addr_of(pack_list));
             break;
         case SIGN: {
             uint16_t new_id = make_id();
