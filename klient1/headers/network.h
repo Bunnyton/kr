@@ -30,3 +30,5 @@ NetworkContext* network_init(int port, in_addr_t addr);
 void network_fini(NetworkContext *ctx);
 
 in_addr_t s_addr_of(packet_list *pack_list);
+
+packet_list* copy_of_packet_list(packet_list *pack_list);

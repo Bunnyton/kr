@@ -63,10 +63,11 @@ uint16_t find_id(in_addr_t addr)
         if (read_to(file, '\n', str) == EOF)
             goto error3;//чтение адреса
 
-        if (inet_aton(str, (struct in_addr*) current_addr) == 0)
-            goto error3;
+        struct in_addr struct_addr;
+        struct_addr.s_addr = addr;
 
-        if (*current_addr == addr)
+        char *ch = inet_ntoa(struct_addr);
+        if (strcmp(inet_ntoa(struct_addr), str) == 0)
             return current_id;
     }
 
@@ -125,20 +126,24 @@ bool save_msg(char *buffer, uint16_t id) {
         perror("can't allocate memory");
         return false;
     }
+    char txt[4];
+    txt[0] = '.';
+    txt[1] = 't';
+    txt[2] = 'x';
+    txt[3] = 't';
+
     filename = realloc(filename, strlen(filename) + 4);
-    stradd(filename, ".txt", strlen(filename));
-
-    bool result = true;
-
+    memcpy(filename + strlen(filename), txt, 4); bool result = true;
     FILE *file = fopen(filename, "a");
     if (file == NULL) {
         perror("file error");
         result = false;
     }
 
-    fprintf(file, "%c%s%c\n", CTX, buffer, ETX);
+    if (fprintf(file, "%c%s%c\n", CTX, buffer, ETX) <= 0)
+        result = false;
 
-    free(file);
+    fclose(file);
     free(filename);
 
     return result;

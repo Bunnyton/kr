@@ -8,10 +8,8 @@ bool receive_pack(NetworkContext *ctx, packet_list* pack_list)
 
     memcpy(&pack_list->addr, &ctx->addr, len);
 
-    printf("!!!!!!!!!\n");
     ssize_t n = recvfrom(ctx->sock, pack_list->pack , PACKET_SIZE
                      , MSG_WAITALL, (struct sockaddr*) &pack_list->addr, &len);
-    printf(":::::\n");
     if (n == -1) return false;
 
     return true;
@@ -19,15 +17,6 @@ bool receive_pack(NetworkContext *ctx, packet_list* pack_list)
 
 void* start_receive_manager(NetworkContext *ctx)
 {
-    process_permission_flag = false;
-
-    fifo_recv_last = fifo_recv_start;
-    if (fifo_recv_last)
-        while (fifo_recv_last->next != NULL)//FIXME переделать
-            fifo_recv_last = fifo_recv_last->next;
-
-    process_permission_flag = true;
-
     while(1) {
         packet_list *new = (packet_list*) malloc(sizeof(packet_list));
         if (!new) {

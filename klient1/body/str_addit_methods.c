@@ -30,12 +30,6 @@ uint16_t str_to_uint16_t(char *str)
     return val;
 }
 
-void stradd(char *dest, char *src, ulong start)
-{
-    for (int i = 0; i < strlen(src); ++i)
-        dest[start + i] = src[i];
-}
-
 int read_to(FILE *file, char end_sym, char *str)
 {
     int len = 0;
