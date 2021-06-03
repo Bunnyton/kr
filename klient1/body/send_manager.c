@@ -53,9 +53,10 @@ wait_packet_list* find_in_wait_queue(in_addr_t addr, deliver_status status, unsi
     char *str_addr = inet_ntoa(saddr);
 
     wait_packet_list *current = start;
+    char *str = inet_ntoa(current->addr->sin_addr);
     while (current != NULL && (strcmp(inet_ntoa(current->addr->sin_addr), str_addr) != 0
                                                     || current->status != status
-                                                    || current->pack->header.msg_id == msg_id)) {
+                                                    || current->pack->header.msg_id != msg_id)) {
         current = current->next;
     }
     return current;

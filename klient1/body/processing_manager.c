@@ -238,13 +238,11 @@ void* start_processing_manager()
 
     process(fifo_recv_start);
     while(true) {
-        if(process_permission_flag) {
-            if (fifo_recv_start->next != NULL) {
-                packet_list *helper = fifo_recv_start->next;
-                delete_pack_list(fifo_recv_start);
-                fifo_recv_start = helper;
-                process(fifo_recv_start);
-            }
+        if (fifo_recv_start->next != NULL) {
+            packet_list *helper = fifo_recv_start->next;
+            delete_pack_list(fifo_recv_start);
+            fifo_recv_start = helper;
+            process(fifo_recv_start);
         }
     }
 }

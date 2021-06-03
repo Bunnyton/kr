@@ -32,14 +32,14 @@ bool sign_in()
             goto error2;
         }
 
-    packet *pack = convert_to_packets(helper, sizeof(helper), SIGN, 0);//msg id ни на что не влияет
+    packet *pack = convert_to_packets(helper, sizeof(helper), UNKNOWN, SIGN);
     if (pack == NULL){
         perror("convert error");
         goto error3;
     }
 
     for(int i = 0; i < 10; ++i)
-        if (!send_packet(ctx, &pack[0], &ctx->addr)) {
+        if (!send_packet(ctx, &pack[0], &ctx->addr, DELIVERED)) {
             perror("send error");
             goto error4;
         }
@@ -100,10 +100,6 @@ NetworkContext* system_init(){
 
     fifo_recv_start = NULL;
     fifo_recv_last = NULL;
-    start = NULL;
-    last = NULL;
-    current_msg_id = 0;
-
     process_permission_flag = false;
 
     FILE *file = fopen(USER_LIST_FILE, "r");
@@ -125,16 +121,25 @@ void system_start(NetworkContext *ctx)
     pthread_t id1, id2, id3;
     pthread_create(&id1, NULL, (void*(*)(void *))start_receive_manager, ctx);
     pthread_create(&id2, NULL, (void*(*)(void *)) start_processing_manager, NULL);
-    pthread_create(&id3, NULL, start_send_manager, NULL);
+    //pthread_create(&id3, NULL, start_send, NULL);
 
     sign_in();
     packet_list *helper = NULL;
 
-    char *buffer = malloc(sizeof(char) * MAXLINE * 500);
+    char *buffer = malloc(sizeof(char) * MAXLINE);
     while(1) {
-        printf("Message to id 2: ");
+        printf("Message to id 1: ");
         read_to(stdin, '\n', buffer);
-        send_msg(buffer, strlen(buffer), 2, current_msg_id);
-        ++current_msg_id;
+        send_msg(buffer, strlen(buffer), 1);
+        if (fifo_recv_start != NULL) {
+            if (helper == NULL) {
+                helper = fifo_recv_start;
+                printf("Message:%s", helper->pack->msg);
+            }
+            while (helper->next != NULL) {
+                printf("Message from %d: %s\n", helper->next->pack->header.send_id, helper->next->pack->msg);
+                helper = helper->next;
+            }
+        }
     }
 }
