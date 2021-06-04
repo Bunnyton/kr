@@ -189,7 +189,7 @@ void process(packet_list *pack_list)
 
         case SIGNAL:
         {
-            unsigned msg_id = pack_list->pack->header.msg_id;
+            uint8_t msg_id = pack_list->pack->header.msg_id;
             wait_packet_list *helper = find_in_wait_queue(s_addr_of(pack_list), WAIT_DELIVER, msg_id);
             if (helper != NULL) {
                 if (helper->pack->header.type == QUERY) {
@@ -210,21 +210,22 @@ void process(packet_list *pack_list)
         }
         case SIGN:
         {
-            uint16_t new_id = make_id();
-            if (new_id == UNKNOWN) {
-                //выход из системы
-            }
-            add_user_rec(make_id(), pack_list->pack->msg, pack_list->addr.sin_addr.s_addr);
-            char *my_nick = find_nick(MY_ID);
-            if (my_nick == NULL) {
-                //выход из системы
-            }
+            if (pack_list->id == UNKNOWN) {
+                uint16_t new_id = make_id();
+                if (new_id == UNKNOWN) {
+                    //выход из системы
+                }
+                add_user_rec(make_id(), pack_list->pack->msg, pack_list->addr.sin_addr.s_addr);
+                char *my_nick = find_nick(MY_ID);
+                if (my_nick == NULL) {
+                    //выход из системы
+                }
 
-            unsigned msg_id = pack_list->pack->header.msg_id;
-            if (!send_msg_to(my_nick, strlen(my_nick), pack_list->addr.sin_addr.s_addr, msg_id)) {
-                //выход из системы
+                uint8_t msg_id = pack_list->pack->header.msg_id;
+                if (!send_msg_to(my_nick, strlen(my_nick), pack_list->addr.sin_addr.s_addr, msg_id)) {
+                    //выход из системы
+                }
             }
-
         }
         default:
             break;

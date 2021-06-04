@@ -1,12 +1,5 @@
 #include "../headers/send_manager.h"
 
-char* read_from_keyboard()//Дописать как в мессенджере
-{
-    char* buf;
-    read_to(stdin, '\n', buf);
-    return buf;
-}
-
 bool add_in_wait_queue(packet *pack, struct sockaddr_in *addr, deliver_status status)
 {
     wait_packet_list *new = (wait_packet_list*) malloc(sizeof(wait_packet_list));
@@ -47,7 +40,7 @@ bool add_in_wait_queue(packet *pack, struct sockaddr_in *addr, deliver_status st
     return false;
 }
 
-wait_packet_list* find_in_wait_queue(in_addr_t addr, deliver_status status, unsigned msg_id) {
+wait_packet_list* find_in_wait_queue(in_addr_t addr, deliver_status status, uint8_t msg_id) {
     struct in_addr saddr;
     saddr.s_addr = addr;
     char *str_addr = inet_ntoa(saddr);
@@ -93,10 +86,8 @@ bool check_wait_queue()
                 current->status = WAIT_DELIVER;
                 current->send_time = clock();
                 network_send_packet(current->pack, addr);
-            } else {
+            } else if (current->status != WAIT_SIGNAL) {
                 double wait_time = WAIT_TIME_FOR_SEND;
-                if (current->status == WAIT_SIGNAL)
-                    wait_time = WAIT_TIME_FOR_SIGNAL;
                 if (current->status == ERROR)
                     wait_time = 0;
 
@@ -147,7 +138,7 @@ bool network_send_packet(packet *pack, in_addr_t addr)
     return result;
 }
 
-bool send_msg_to(char* buffer, unsigned buff_len, in_addr_t addr, unsigned msg_id)
+bool send_msg_to(char* buffer, unsigned buff_len, in_addr_t addr, uint8_t msg_id)
 {
     if (buff_len == 0)
         return false;
@@ -167,19 +158,13 @@ bool send_msg_to(char* buffer, unsigned buff_len, in_addr_t addr, unsigned msg_i
                 return false;
 
 
-    if (!add_in_wait_queue(&packets[0], &sockaddr, WAIT_DELIVER))
+    if (!add_in_wait_queue(&packets[0], &sockaddr, WAIT_SEND))
         return false;
-
-    if (!network_send_packet(&packets[0], addr)){
-        perror("can't send packet");
-        free(packets);
-        return false;
-    }
 
     return true;
 }
 
-bool send_msg(char* buffer, unsigned buff_len, uint16_t id, unsigned msg_id)
+bool send_msg(char* buffer, unsigned buff_len, uint16_t id, uint8_t msg_id)
 {
     in_addr_t *addr = find_addr(id);
     if (addr == NULL) {
@@ -192,7 +177,7 @@ bool send_msg(char* buffer, unsigned buff_len, uint16_t id, unsigned msg_id)
     return  status;
 }
 
-bool send_signal(in_addr_t addr, unsigned msg_id)
+bool send_signal(in_addr_t addr, uint8_t msg_id)
 {
     packet pack;
     pack.header = pack_header(0, SIGNAL, msg_id);

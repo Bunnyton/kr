@@ -24,8 +24,6 @@ typedef struct _packet_list packet_list;
 packet_list *fifo_recv_start;
 packet_list *fifo_recv_last;
 
-bool process_permission_flag;
-
 NetworkContext* network_init(int port, in_addr_t addr);
 void network_fini(NetworkContext *ctx);
 

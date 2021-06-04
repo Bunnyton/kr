@@ -10,7 +10,7 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 
-#define PORT 8082
+#define PORT 8083
 
 #define ID 1
 

@@ -24,9 +24,8 @@ typedef enum _packet_type packet_type;
 struct _head_pack {
     packet_type type;
     uint32_t num;
-    unsigned msg_id;
+    uint8_t msg_id;
 };
-
 typedef struct _head_pack head_pack;
 
 struct _packet {
@@ -36,9 +35,9 @@ struct _packet {
 
 typedef struct _packet packet;
 
-head_pack pack_header(uint32_t num, packet_type type, unsigned msg_id);
+head_pack pack_header(uint32_t num, packet_type type, uint8_t msg_id);
 
-packet* convert_to_packets(char *buffer, unsigned buff_len, packet_type type, unsigned msg_id);
+packet* convert_to_packets(char *buffer, unsigned buff_len, packet_type type, uint8_t msg_id);
 //Если тип пакета соответствует MSG, то он может быть изменен на MULT_MSG и Query
 
 packet* copy_of_packet(packet *pack);

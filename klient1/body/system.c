@@ -104,8 +104,6 @@ NetworkContext* system_init(){
     last = NULL;
     current_msg_id = 0;
 
-    process_permission_flag = false;
-
     FILE *file = fopen(USER_LIST_FILE, "r");
     if (file == NULL) {
         if (!sign_up()) {
@@ -128,9 +126,8 @@ void system_start(NetworkContext *ctx)
     pthread_create(&id3, NULL, start_send_manager, NULL);
 
     sign_in();
-    packet_list *helper = NULL;
 
-    char *buffer = malloc(sizeof(char) * MAXLINE * 500);
+    char *buffer = malloc(sizeof(char) * MAXLINE);
     while(1) {
         printf("Message to id 2: ");
         read_to(stdin, '\n', buffer);

@@ -1,6 +1,6 @@
 #include "../headers/pack.h"
 
-head_pack pack_header(uint32_t num, packet_type type, unsigned msg_id)
+head_pack pack_header(uint32_t num, packet_type type, uint8_t msg_id)
 {
     head_pack header;
 
@@ -11,7 +11,7 @@ head_pack pack_header(uint32_t num, packet_type type, unsigned msg_id)
     return header;
 }
 
-packet* convert_to_packets(char *buffer, unsigned buff_len, packet_type type, unsigned msg_id)
+packet* convert_to_packets(char *buffer, unsigned buff_len, packet_type type, uint8_t msg_id)
 {
     if (buffer == NULL)
         return NULL;
