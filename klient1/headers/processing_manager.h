@@ -3,6 +3,7 @@
 #include "network.h"
 #include "filework.h"
 #include "send_manager.h"
+#include "receive_manager.h"
 
 struct _mult_msg{
     unsigned amount;
@@ -13,6 +14,20 @@ typedef struct _mult_msg mult_msg;
 
 mult_msg *start_mult_msg;
 mult_msg *last_mult_msg;
+
+struct _msg_id_list{
+    uint8_t *msg_id;
+    bool *msg_id_available;
+    uint16_t size;
+};
+
+typedef struct _msg_id_list msg_id_list;
+
+msg_id_list users_last_msg_id;
+
+
+bool users_msg_id_update(uint16_t id, uint8_t msg_id);
+bool users_msg_id_check(uint16_t id, uint8_t msg_id);
 
 bool make_new_mult_msg(packet_list *pack_list);
 void add_in_mult_msg(packet_list *pack_list);

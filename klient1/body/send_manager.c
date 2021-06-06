@@ -23,12 +23,13 @@ bool add_in_wait_queue(packet *pack, struct sockaddr_in *addr, deliver_status st
     new->status = status;
     new->send_time = clock();
 
-    if (!start) {
-        start = new;
-        last = new;
+    while (!wait_queue_stop_flag) { }
+    if (!wait_pack_start) {
+        wait_pack_start = new;
+        wait_pack_last = new;
     } else {
-        last->next = new;
-        last = new;
+        wait_pack_last->next = new;
+        wait_pack_last = new;
     }
 
     return true;
@@ -45,7 +46,7 @@ wait_packet_list* find_in_wait_queue(in_addr_t addr, deliver_status status, uint
     saddr.s_addr = addr;
     char *str_addr = inet_ntoa(saddr);
 
-    wait_packet_list *current = start;
+    wait_packet_list *current = wait_pack_start;
     char *str = inet_ntoa(current->addr->sin_addr);
     while (current != NULL && (strcmp(inet_ntoa(current->addr->sin_addr), str_addr) != 0
                                                     || current->status != status
@@ -65,31 +66,33 @@ double diff_time(time_t time) { return (double)(clock() - time) / CLOCKS_PER_SEC
 
 bool check_wait_queue()
 {
-    wait_packet_list *current = start;
-    wait_packet_list *previous = start;
+    wait_packet_list *current = wait_pack_start;
+    wait_packet_list *previous = wait_pack_start;
     while (current != NULL){
         if (current->status == DELIVERED) {
+            wait_queue_stop_flag = false;
             if (previous == current) {
-                start = current->next;
+                wait_pack_start = current->next;
                 delete_wait_pack(current);
-                current = start;
+                current = wait_pack_start;
             } else {
                 previous->next = current->next;
                 delete_wait_pack(current);
                 current = previous;
             }
             if (current && current->next == NULL)
-                last = current;
+                wait_pack_last = current;
+            wait_queue_stop_flag = true;
         } else {
-            if (current->status == WAIT_SEND){
+            if (current->status == WAIT_SEND)
+            {
                 in_addr_t addr = current->addr->sin_addr.s_addr;
                 current->status = WAIT_DELIVER;
                 current->send_time = clock();
+
                 network_send_packet(current->pack, addr);
             } else if (current->status != WAIT_SIGNAL) {
                 double wait_time = WAIT_TIME_FOR_SEND;
-                if (current->status == ERROR)
-                    wait_time = 0;
 
                 if (diff_time(current->send_time) >= wait_time) {
                     in_addr_t addr = current->addr->sin_addr.s_addr;
@@ -119,10 +122,9 @@ bool send_packet(NetworkContext *ctx, packet *pack, struct sockaddr_in *addr)
             , (const struct sockaddr *) addr
             , sizeof(*addr));
 
-    if (n != sizeof(packet)) {
-        last->status = ERROR;
+    if (n != sizeof(packet))
         return false;
-    }
+
     return true;
 }
 
@@ -167,10 +169,9 @@ bool send_msg_to(char* buffer, unsigned buff_len, in_addr_t addr, uint8_t msg_id
 bool send_msg(char* buffer, unsigned buff_len, uint16_t id, uint8_t msg_id)
 {
     in_addr_t *addr = find_addr(id);
-    if (addr == NULL) {
+    if (addr == NULL)
         return false;
-        //Возможно, здесь может быть что-то завязанное на регистрацию
-    }
+
     bool status = send_msg_to(buffer, buff_len, *addr, msg_id);
 
     free(addr);
@@ -188,7 +189,13 @@ bool send_signal(in_addr_t addr, uint8_t msg_id)
 
 void* start_send_manager()
 {
-    while(check_wait_queue()) { }
+    while(check_wait_queue() && !exit_flag) { }
 
+    while(wait_pack_start != NULL) {
+        wait_packet_list *helper = wait_pack_start->next;
+        delete_wait_pack(wait_pack_start);
+        wait_pack_start = helper;
+    }
+    exit_flag = true;
     return NULL;
 }

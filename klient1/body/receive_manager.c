@@ -17,30 +17,31 @@ bool receive_pack(NetworkContext *ctx, packet_list* pack_list)
 
 void* start_receive_manager(NetworkContext *ctx)
 {
-    while(1) {
+    while(true && !exit_flag) {
         packet_list *new = (packet_list*) malloc(sizeof(packet_list));
         if (!new) {
             perror("can't allocate memory");
-            return NULL;
+            goto error;
         }
 
         new->pack = (packet*) malloc(sizeof(packet));
         if (!new->pack) {
             free(new);
             perror("can't allocate memory");
-            return NULL;
+            goto error;
         }
 
         if (!receive_pack(ctx, new)) {
             free(new->pack);
             free(new);
             perror("can't receive packet");
-            return NULL;
+            goto error;
         }
 
         new->id = UNKNOWN;
         new->next = NULL;
 
+        while (!receive_stop_flag) { }
         if (fifo_recv_start) {
 
             fifo_recv_last->next = new;
@@ -50,7 +51,9 @@ void* start_receive_manager(NetworkContext *ctx)
 
             fifo_recv_start = new;
             fifo_recv_last = fifo_recv_start;
-
         }
     }
+    error:
+    exit_flag = true;
+    return NULL;
 }

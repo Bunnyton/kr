@@ -88,10 +88,10 @@ NetworkContext* system_init(){
 
     int broadcast_enable = 1;
 
-    /*if (setsockopt(ctx->sock, SOL_SOCKET, SO_BROADCAST, &broadcast_enable, sizeof(broadcast_enable)) == -1){
+    if (setsockopt(ctx->sock, SOL_SOCKET, SO_BROADCAST, &broadcast_enable, sizeof(broadcast_enable)) == -1){
         perror("setsockopt failed");
         goto error;
-    }*/
+    }
 
     if (bind(ctx->sock, (const struct sockaddr *) &ctx->addr, sizeof(ctx->addr)) < 0){
         perror("can't bind socket");
@@ -100,9 +100,17 @@ NetworkContext* system_init(){
 
     fifo_recv_start = NULL;
     fifo_recv_last = NULL;
-    start = NULL;
-    last = NULL;
-    current_msg_id = 0;
+
+    wait_pack_start = NULL;
+    wait_pack_last = NULL;
+
+    users_last_msg_id.msg_id = NULL;
+    users_last_msg_id.size = 0;
+    current_msg_id = 1;
+
+    receive_stop_flag = true;
+    wait_queue_stop_flag = true;
+    exit_flag = false;
 
     FILE *file = fopen(USER_LIST_FILE, "r");
     if (file == NULL) {
@@ -128,10 +136,23 @@ void system_start(NetworkContext *ctx)
     sign_in();
 
     char *buffer = malloc(sizeof(char) * MAXLINE);
-    while(1) {
-        printf("Message to id 2: ");
+    if (buffer == NULL) exit_flag = true;
+
+    while(true && !exit_flag) {
+        unsigned id  = 0;
+        printf("Id of receive user (0 = exit): ");
+        scanf("%d", &id);
+
+        if (id == 0) {
+            exit_flag = true;
+            sleep(2);
+            break;
+        }
+
+        printf("Message: ");
         read_to(stdin, '\n', buffer);
-        send_msg(buffer, strlen(buffer), 2, current_msg_id);
+
+        send_msg(buffer, strlen(buffer), id, current_msg_id);
         ++current_msg_id;
     }
 }

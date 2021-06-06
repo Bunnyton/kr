@@ -11,7 +11,6 @@ enum _deliver_status {
       WAIT_SIGNAL
     , WAIT_DELIVER
     , DELIVERED
-    , ERROR
     , WAIT_SEND
 };
 typedef enum _deliver_status deliver_status;
@@ -27,9 +26,10 @@ struct _wait_packet_list{
 typedef struct _wait_packet_list wait_packet_list;
 
 
-wait_packet_list *start;
-wait_packet_list *last;
+wait_packet_list *wait_pack_start;
+wait_packet_list *wait_pack_last;
 
+bool wait_queue_stop_flag;
 uint8_t current_msg_id;
 
 bool send_packet(NetworkContext *ctx, packet *pack, struct sockaddr_in *addr);

@@ -160,75 +160,110 @@ bool add_user_rec(uint16_t id, char *nick, in_addr_t addr)
     return false;
 }
 
+bool users_msg_id_update(uint16_t id, uint8_t msg_id)
+{
+    if (id > users_last_msg_id.size) {
+        users_last_msg_id.msg_id = realloc(users_last_msg_id.msg_id, sizeof(msg_id) * id);
+        if (users_last_msg_id.msg_id == NULL)
+            return false;
+        users_last_msg_id.msg_id_available = realloc(users_last_msg_id.msg_id_available, sizeof(bool) * id);
+        if (users_last_msg_id.msg_id_available == NULL) {
+            free(users_last_msg_id.msg_id);
+            return false;
+        }
+        for (unsigned i = users_last_msg_id.size; i < id; ++i)
+            users_last_msg_id.msg_id_available[i] = false;
+        users_last_msg_id.size = id;
+    }
+    users_last_msg_id.msg_id[id - 1] = msg_id;
+    users_last_msg_id.msg_id_available[id - 1] = true;
+
+    return true;
+}
+
+bool users_msg_id_check(uint16_t id, uint8_t msg_id)
+{
+    if (id == UNKNOWN) return true;
+
+    if (users_last_msg_id.size >= id && users_last_msg_id.msg_id_available[id - 1]) {
+        if (msg_id == users_last_msg_id.msg_id[id-1])
+            return false;
+    }
+    if (!users_msg_id_update(id, msg_id))
+        return false;
+    return true;
+}
+
 void process(packet_list *pack_list)
 {
     pack_list->id = find_id(pack_list->addr.sin_addr.s_addr);
 
-    if (pack_list->id != UNKNOWN || (pack_list->id == UNKNOWN && pack_list->pack->header.type == SIGN))
-    switch(pack_list->pack->header.type)
-    {
-        case MSG:
+    if (users_msg_id_check(pack_list->id, pack_list->pack->header.msg_id)
+                                        || pack_list->pack->header.type == SIGNAL
+                                        || pack_list->pack->header.type == MULT_MSG) {
+        if (pack_list->id != UNKNOWN || (pack_list->id == UNKNOWN && pack_list->pack->header.type == SIGN)) {
+            switch (pack_list->pack->header.type) {
+                case MSG:
 
-            if (!save_msg(pack_list->pack->msg, pack_list->id)){
-                //Выход из системы
-            }
-            send_signal(s_addr_of(pack_list), pack_list->pack->header.msg_id);
-            break;
+                    if (!save_msg(pack_list->pack->msg, pack_list->id))
+                        exit_flag = true;
 
-        case QUERY:
+                    send_signal(s_addr_of(pack_list), pack_list->pack->header.msg_id);
+                    break;
 
-            make_new_mult_msg(pack_list);
-            send_signal(s_addr_of(pack_list), pack_list->pack->header.msg_id);
-            break;
+                case QUERY:
 
-        case MULT_MSG:
+                    make_new_mult_msg(pack_list);
+                    send_signal(s_addr_of(pack_list), pack_list->pack->header.msg_id);
+                    break;
 
-            send_signal(s_addr_of(pack_list), pack_list->pack->header.msg_id);
-            add_in_mult_msg(pack_list);
-            break;
+                case MULT_MSG:
 
-        case SIGNAL:
-        {
-            uint8_t msg_id = pack_list->pack->header.msg_id;
-            wait_packet_list *helper = find_in_wait_queue(s_addr_of(pack_list), WAIT_DELIVER, msg_id);
-            if (helper != NULL) {
-                if (helper->pack->header.type == QUERY) {
-                    wait_packet_list* current_wait_pack;
-                    current_wait_pack = find_in_wait_queue(s_addr_of(pack_list), WAIT_SIGNAL, msg_id);
+                    add_in_mult_msg(pack_list);
+                    send_signal(s_addr_of(pack_list), pack_list->pack->header.msg_id);
+                    break;
 
-                    while (current_wait_pack != NULL) {
-                        current_wait_pack->status = WAIT_SEND;
-                        current_wait_pack = find_in_wait_queue(s_addr_of(pack_list), WAIT_SIGNAL, msg_id);
+                case SIGNAL: {
+                    uint8_t msg_id = pack_list->pack->header.msg_id;
+                    wait_packet_list *helper = find_in_wait_queue(s_addr_of(pack_list), WAIT_DELIVER, msg_id);
+                    if (helper != NULL) {
+                        if (helper->pack->header.type == QUERY) {
+                            wait_packet_list *current_wait_pack;
+                            current_wait_pack = find_in_wait_queue(s_addr_of(pack_list), WAIT_SIGNAL, msg_id);
+
+                            while (current_wait_pack != NULL) {
+                                current_wait_pack->status = WAIT_SEND;
+                                current_wait_pack = find_in_wait_queue(s_addr_of(pack_list), WAIT_SIGNAL, msg_id);
+                            }
+                        }
+
+                        if (helper->status != DELIVERED)
+                            helper->status = DELIVERED;
+
+                    }
+                    break;
+                }
+                case SIGN: {
+                    if (pack_list->id == UNKNOWN) {
+                        uint16_t new_id = make_id();
+                        if (new_id == UNKNOWN)
+                            exit_flag = true;
+
+                        add_user_rec(make_id(), pack_list->pack->msg, pack_list->addr.sin_addr.s_addr);
+                        char *my_nick = find_nick(MY_ID);
+                        if (my_nick == NULL)
+                            exit_flag = true;
+
+                        uint8_t msg_id = pack_list->pack->header.msg_id;
+                        if (!send_msg_to(my_nick, strlen(my_nick), pack_list->addr.sin_addr.s_addr, msg_id))
+                            exit_flag = true;
+
                     }
                 }
-
-                if (helper->status != DELIVERED)
-                    helper->status = DELIVERED;
-
-            }
-            break;
-        }
-        case SIGN:
-        {
-            if (pack_list->id == UNKNOWN) {
-                uint16_t new_id = make_id();
-                if (new_id == UNKNOWN) {
-                    //выход из системы
-                }
-                add_user_rec(make_id(), pack_list->pack->msg, pack_list->addr.sin_addr.s_addr);
-                char *my_nick = find_nick(MY_ID);
-                if (my_nick == NULL) {
-                    //выход из системы
-                }
-
-                uint8_t msg_id = pack_list->pack->header.msg_id;
-                if (!send_msg_to(my_nick, strlen(my_nick), pack_list->addr.sin_addr.s_addr, msg_id)) {
-                    //выход из системы
-                }
+                default:
+                    break;
             }
         }
-        default:
-            break;
     }
 }
 
@@ -237,13 +272,33 @@ void* start_processing_manager()
 {
     while(!fifo_recv_start) { }
 
-    process(fifo_recv_start);
-    while(true) {
-        if (fifo_recv_start->next != NULL) {
-            packet_list *helper = fifo_recv_start->next;
-            delete_pack_list(fifo_recv_start);
-            fifo_recv_start = helper;
-            process(fifo_recv_start);
-        }
+    if (!exit_flag) process(fifo_recv_start);
+
+    while(true && !exit_flag) {
+            if (fifo_recv_start->next != NULL) {
+                packet_list *helper = fifo_recv_start->next;
+
+                receive_stop_flag = false;
+                delete_pack_list(fifo_recv_start);
+                receive_stop_flag = true;
+
+                fifo_recv_start = helper;
+                process(fifo_recv_start);
+            }
     }
+
+    while (fifo_recv_start != NULL) {
+        packet_list *helper = fifo_recv_start->next;
+        delete_pack_list(fifo_recv_start);
+        fifo_recv_start = helper;
+    }
+
+    while(start_mult_msg != NULL) {
+        mult_msg *helper = start_mult_msg->next;
+        delete_mult_msg(start_mult_msg);
+        start_mult_msg = helper;
+    }
+
+    if (users_last_msg_id.msg_id) free(users_last_msg_id.msg_id);
+    if (users_last_msg_id.msg_id_available) free(users_last_msg_id.msg_id_available);
 }

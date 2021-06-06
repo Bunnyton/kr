@@ -35,9 +35,16 @@ int read_to(FILE *file, char end_sym, char *str)
     int len = 0;
 
     char current_value;
-    while (fscanf(file, "%c", &current_value) != EOF && current_value != end_sym){
+
+    current_value = (char) fgetc(file);
+
+    if (!feof(file) && current_value == '\n')
+        current_value = (char) fgetc(file);
+
+    while (!feof(file) && current_value != end_sym) {
         ++len;
         str[len - 1] = current_value;
+        current_value = (char) fgetc(file);
     }
 
     str[len] = '\0';
